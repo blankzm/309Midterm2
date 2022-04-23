@@ -67,31 +67,43 @@ covid_ages1 <- ohioCovid %>%
 
 ########## WITH ANNOTATIONS:
 ## filter for surges of interest
-ggplot(covid_ages1 %>% filter(Surge%in%c("Alpha Surge", "Delta Surge", "Omicron Surge")), aes(x=Surge, fill=`Age Range`)) + 
+gg1 <- ggplot(covid_ages1 %>% filter(Surge%in%c("Alpha Surge", "Delta Surge", "Omicron Surge")), aes(x=Surge, fill=`Age Range`)) + 
   ## look at proportions
   geom_bar(position="fill") +
   coord_cartesian(expand=FALSE) +
   scale_fill_brewer(palette="YlOrBr") +
   
   ## flip so younger is on bottom - have to reorder labels
-  scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1.00), labels=c("1.00", 0.75, "0.50", 0.25, "0.00"), trans="reverse") +
+  scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1.00), labels=c("100%", "75%", "50%", "25%", "0%"), trans="reverse") +
   
-  annotate("text", x="Alpha Surge", y=0.94, label="0-19", size=5) +
-  annotate("text", x="Alpha Surge", y=0.83, label="20-29", size=5) +
-  annotate("text", x="Alpha Surge", y=0.71, label="30-39", size=5) +
-  annotate("text", x="Alpha Surge", y=0.58, label="40-49", size=5) +
-  annotate("text", x="Alpha Surge", y=0.45, label="50-59", size=5) +
-  annotate("text", x="Alpha Surge", y=0.31, label="60-69", size=5) +
-  annotate("text", x="Alpha Surge", y=0.16, label="70-79", size=5) +
-  annotate("text", x="Alpha Surge", y=0.05, label="Age Group: 80+", size=5) +
+  annotate("text", x="Alpha Surge", y=0.94, label="0-19", size=5, family="serif") +
+  annotate("text", x="Alpha Surge", y=0.83, label="20-29", size=5, family="serif") +
+  annotate("text", x="Alpha Surge", y=0.71, label="30-39", size=5, family="serif") +
+  annotate("text", x="Alpha Surge", y=0.58, label="40-49", size=5, family="serif") +
+  annotate("text", x="Alpha Surge", y=0.45, label="50-59", size=5, family="serif") +
+  annotate("text", x="Alpha Surge", y=0.31, label="60-69", size=5, family="serif") +
+  annotate("text", x="Alpha Surge", y=0.16, label="70-79", size=5, family="serif") +
+  annotate("text", x="Alpha Surge", y=0.05, label="Age Group: 80+", size=5, family="serif") +
   
   theme_minimal() +
-  theme(legend.position = "none") +
-  labs(title="Percent of Total Cases Belonging to Each Age Group by Surge",
-       subtitle = "#####",
+  theme(legend.position = "none",
+        plot.title=element_text(family="serif", size=16),
+        plot.subtitle=element_text(family="serif"),
+        axis.text = element_text(family="serif"),
+        plot.caption=element_text(family="mono"),
+        panel.grid.minor=element_blank()) +
+  labs(title="Percent of Total Cases Belonging to Each Age Group",
+       subtitle = "Grouped by surge.\nAge groups are labelled on the bar corresponding to the Alpha Surge; colors remain consistent across surges.\nWe note that the Delta and Omicron surges had higher impacts on the younger population compared to the Alpha surge.",
        caption="Source: https://coronavirus.ohio.gov/static/dashboards/COVIDDeathData_CountyOfResidence.csv",
        y=element_blank(),
        x=element_blank())
+
+ggsave(filename = "covp1-percByAge.png",
+       plot=gg1,
+       device="png",
+       width=8,
+       height=6,
+       dpi=600)
 
 
 ############ WITH LEGEND:
