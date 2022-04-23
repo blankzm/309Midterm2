@@ -156,12 +156,53 @@ library(ggthemes)
 ggplot(covid_ages,
        aes(x=Date, y=Cases)) +
   geom_line(aes(color=Surge)) + 
+  
+  # ## trying something out - add line for 0-19
+  # geom_line(covid_ages1 %>% filter(`Age Range` == "0-19"),
+  #           mapping = aes(x=Date, y=Cases)) +
+  
+  
   coord_cartesian(expand=FALSE) +
-  scale_color_manual(values=c("red", "blue", "gray", "green", "gray", "gray", "gray"))  +
+  scale_color_manual(values=c("firebrick", "dodgerblue", "gray", "forestgreen", "gray", "gray", "gray"))  +
   ## annotate surges
-  annotate("text", x = as.Date("2021-01-01"), y = 15000, color="red", label="Alpha Surge") +
-  annotate("text", x = as.Date("2021-09-20"), y = 10000, color="blue", label="Delta Surge") +
-  annotate("text", x = as.Date("2021-10-01"), y = 30000, color="green", label="Alpha Surge") +
+  annotate("text", x = as.Date("2021-01-01"), y = 15000, color="firebrick", label="Alpha Surge") +
+  annotate("text", x = as.Date("2021-09-20"), y = 10000, color="dodgerblue", label="Delta Surge") +
+  annotate("text", x = as.Date("2021-10-01"), y = 30000, color="forestgreen", label="Alpha Surge") +
+  
+  ## testing out significant dates
+  ## vax available:
+  geom_vline(aes(xintercept=as.Date("2020-12-14")), linetype="dotdash", alpha=0.5) +
+  
+  ## second dose timeline:
+  geom_vline(aes(xintercept=as.Date("2021-01-01")), alpha=0.5) +
+  
+  ## ohio closes schools:
+  ## NOTE: not super significant
+  geom_vline(aes(xintercept=as.Date("2020-03-12")), alpha=0.5) +
+  
+  ## easter 2020
+  geom_vline(aes(xintercept=as.Date("2020-04-12")), alpha=0.5) +
+  
+  ## many students go back to school
+  geom_vline(aes(xintercept=as.Date("2020-09-01")), alpha=0.5) +
+  
+  ## school starts up after summer break 2021
+  geom_vline(aes(xintercept=as.Date("2021-08-01")), alpha=0.5) +
+  
+  ## christmases:
+  geom_vline(aes(xintercept=as.Date("2020-12-25")), alpha=0.5) +
+  geom_vline(aes(xintercept=as.Date("2021-12-25")), alpha=0.5) +
+  
+  ## NYEs/NY
+  geom_vline(aes(xintercept=as.Date("2021-01-01")), alpha=0.5) +
+  geom_vline(aes(xintercept=as.Date("2022-01-01")), alpha=0.5) +
+  
+  
+  
+  
+  
+  
+
   theme_minimal() +
   theme(legend.position="none")
 
