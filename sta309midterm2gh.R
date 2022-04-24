@@ -470,3 +470,79 @@ gg3
 
 
 
+#####
+gg3 <- ggplot(covid_vax,
+              aes(x=date, y=totVax)) +
+  geom_col(width=1, alpha=0.5) +
+  
+  ## annotate surges
+  annotate("rect", xmin=as.Date("2020-12-12"), xmax=as.Date("2021-02-28"), ymin=0, ymax=108000, fill="firebrick", alpha=0.2) +
+  annotate("rect", xmin=as.Date("2021-07-01"), xmax=as.Date("2021-11-30"), ymin=0, ymax=108000, fill="dodgerblue", alpha=0.2) +
+  annotate("rect", xmin=as.Date("2021-12-01"), xmax=as.Date("2022-02-28"), ymin=0, ymax=108000, fill="forestgreen", alpha=0.2) +
+  
+  annotate("text", x = as.Date("2021-01-20"), y = 110000, color="firebrick", label="Alpha Surge") +
+  annotate("text", x = as.Date("2021-09-01"), y = 110000, color="dodgerblue", label="Delta Surge") +
+  annotate("text", x = as.Date("2022-01-10"), y = 110000, color="forestgreen", label="Omicron Surge") +
+  
+  ## add smooth line to show general trend
+  geom_smooth(span=0.1, se=FALSE, color="black") +
+  
+  ## some formatting:
+  coord_cartesian(expand=FALSE) +
+  scale_fill_manual(values=c("red", "blue", "gray", "green", "gray"))  +
+  theme_minimal() +
+  theme(legend.position="none") +
+  
+  ## testing out vax dates
+  ## vax available:
+  ## (note: fully transparent rectangle is to nudge axis so annotations will show)
+  annotate("rect", xmin=as.Date("2020-11-01"), xmax=as.Date("2020-12-14"), ymin=75000, ymax=85000, alpha=0) +
+  annotate("text", x=as.Date("2020-12-12"), y=82000, label="First Available\nDec. '20", size=2) +
+  annotate("segment", x=as.Date("2020-12-14"), xend=as.Date("2020-12-12"), y=80000, yend=0) +
+  
+  
+  
+  ## available for 65 +
+  annotate("text", x=as.Date("2021-01-18"), y=102000, label="65+ Age Group\nJan. '21", size=2) +
+  annotate("segment", x=as.Date("2021-01-18"), xend=as.Date("2021-01-18"), y=100000, yend=0) +
+  
+  ## educators/childcare staff
+  annotate("text", x=as.Date("2021-02-28"), y=82000, label="Educators and Childcare staff\nMar. '21", size=2) +
+  annotate("segment", x=as.Date("2021-03-02"), xend=as.Date("2021-03-02"), y=80000, yend=0) +
+  
+  ## 16+ (pfizer)/ 18+(jj / moderna)
+  annotate("text", x=as.Date("2021-04-13"), y=102000, label="16+ (Pfizer) or\n18+(J&J + Moderna) Age Groups\nApr. '21", size=2) +
+  annotate("segment", x=as.Date("2021-04-15"), xend=as.Date("2021-04-15"), y=100000, yend=0) +
+  
+  ## fda approval(pfizer)
+  annotate("text", x=as.Date("2021-09-22"), y=82000, label="FDA approval for Pfizer\nSep. '21", size=2) +
+  annotate("segment", x=as.Date("2021-09-24"), xend=as.Date("2021-09-24"), y=80000, yend=0) +
+  
+  ## pfizer for 5+
+  annotate("text", x=as.Date("2021-11-01"), y=102000, label="5+ Age Group (Pfizer)\nNov. '21", size=2)  +
+  annotate("segment", x=as.Date("2021-11-03"), xend=as.Date("2021-11-03"), y=100000, yend=0) +
+  
+  ## more formatting:
+  scale_x_date(date_labels = "%b '%y") +
+  scale_y_continuous(limits=c(0,115000)) +
+  theme_minimal() +
+  theme(legend.position="none",
+        axis.title.x=element_blank(),
+        plot.title=element_text(family="serif", size=16),
+        plot.subtitle=element_text(family="serif"),
+        axis.text = element_text(family="serif"),
+        plot.caption=element_text(family="mono")) +
+  labs(title="Timeline of Daily Vaccinations in Ohio by Surge",
+       subtitle="Progression of vaccination guidelines is annotated. Vaccines observed are first doses.\nData ranges from Dec. 2020 - present. Columns represent daily vaccinations administered.\nSmooth line represents local averaging performed by the loess method.\nWe note that vaccine counts peak after certain group are approved for the vaccine,\nsuch as adults 65 and older, or educators.",
+       caption="Source:  https://coronavirus.ohio.gov/static/dashboards/COVIDDeathData_CountyOfResidence.csv\n& https://www2.census.gov/programs-surveys/popest/datasets/2010-2019/counties/asrh/cc-est2019-agesex-39.csv",
+       y="Total Daily Vaccinations")
+
+ggsave(filename = "vaxTimelineCount.png",
+       plot=gg3,
+       device="png",
+       width=8,
+       height=6,
+       dpi=600)
+
+
+
