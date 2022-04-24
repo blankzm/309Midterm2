@@ -98,7 +98,7 @@ gg1 <- ggplot(covid_ages1 %>% filter(Surge%in%c("Alpha Surge", "Delta Surge", "O
        y=element_blank(),
        x=element_blank())
 
-gg1
+##gg1
 
 ggsave(filename = "covp1-percByAge.png",
        plot=gg1,
@@ -165,7 +165,7 @@ library(ggthemes)
 #   theme(legend.position="none")
 #   ##theme_economist()
 
-ggplot(covid_ages2,
+gg2 <- ggplot(covid_ages2,
        aes(x=Date, y=Cases)) +
   geom_line(aes(color=Surge)) + 
   
@@ -228,13 +228,19 @@ ggplot(covid_ages2,
   annotate("text", y=25000, x=as.Date("2021-11-10"), label="Thanksgiving\n2021", size=3) +
   annotate("segment", x=as.Date("2021-11-25"), xend=as.Date("2021-11-25"), y=0, yend=24000, alpha=0.5) +
   
-
-  
-  
-  
-
+  ## https://www.datanovia.com/en/blog/ggplot-date-axis-customization/
+  scale_x_date(date_labels = "%b '%y") +
   theme_minimal() +
-  theme(legend.position="none")
+  theme(legend.position="none",
+        axis.title.x=element_blank(),
+        plot.title=element_text(family="serif", size=16),
+        plot.subtitle=element_text(family="serif"),
+        axis.text = element_text(family="serif"),
+        plot.caption=element_text(family="mono")) +
+  labs(title="Timeline of Daily Covid Cases in Ohio by Surge",
+       subtitle="Notable events are annotated. Data ranges from Jan. 2020 - present.",
+       caption="Source:  https://coronavirus.ohio.gov/static/dashboards/COVIDDeathData_CountyOfResidence.csv",
+       y="Daily Cases")
 
 gg2
 
@@ -390,7 +396,16 @@ ggplot(covid_vax,
 ## testing w/ rct instead of lines
 gg3 <- ggplot(covid_vax,
        aes(x=date, y=totVax)) +
-  geom_col(width=1, aes(fill=Surge), alpha=0.5) +
+  geom_col(width=1, alpha=0.5) +
+  
+  annotate("rect", xmin=as.Date("2020-12-12"), xmax=as.Date("2021-02-28"), ymin=0, ymax=108000, fill="firebrick", alpha=0.2) +
+  annotate("rect", xmin=as.Date("2021-07-01"), xmax=as.Date("2021-11-30"), ymin=0, ymax=108000, fill="dodgerblue", alpha=0.2) +
+  annotate("rect", xmin=as.Date("2021-12-01"), xmax=as.Date("2022-02-28"), ymin=0, ymax=108000, fill="forestgreen", alpha=0.2) +
+  
+  annotate("text", x = as.Date("2021-01-20"), y = 109000, color="firebrick", label="Alpha Surge") +
+  annotate("text", x = as.Date("2021-09-01"), y = 109000, color="dodgerblue", label="Delta Surge") +
+  annotate("text", x = as.Date("2022-01-10"), y = 109000, color="forestgreen", label="Omicron Surge") +
+  
   geom_smooth(span=0.1, se=FALSE, color="black") +
   coord_cartesian(expand=FALSE) +
   scale_fill_manual(values=c("red", "blue", "gray", "green", "gray"))  +
@@ -434,8 +449,24 @@ gg3 <- ggplot(covid_vax,
   ##geom_vline(aes(xintercept=as.Date("2021-11-03")), linetype="dotdash") +
   ##annotate("rect", xmin=as.Date("2021-10-15"), xmax=as.Date("2021-12-15"), ymin=90000, ymax=110000, alpha=0.2) +
   annotate("text", x=as.Date("2021-11-01"), y=102000, label="5+ Age Group (Pfizer)\nNov. '21", size=2)  +
-  annotate("segment", x=as.Date("2021-11-03"), xend=as.Date("2021-11-03"), y=100000, yend=0) 
+  annotate("segment", x=as.Date("2021-11-03"), xend=as.Date("2021-11-03"), y=100000, yend=0) +
+  
+  scale_x_date(date_labels = "%b '%y") +
+  scale_y_continuous(limits=c(0,110000)) +
+  theme_minimal() +
+  theme(legend.position="none",
+        axis.title.x=element_blank(),
+        plot.title=element_text(family="serif", size=16),
+        plot.subtitle=element_text(family="serif"),
+        axis.text = element_text(family="serif"),
+        plot.caption=element_text(family="mono")) +
+  labs(title="Timeline of Daily Vaccinations in Ohio by Surge",
+       subtitle="Progression of vaccination guidelines is annotated. Vaccines observed are first doses. Data ranges from Dec. 2020 - present.\nColumns represent daily vaccinations administered. Smooth line represents local averaging performed by the loess method.",
+       caption="Source:  https://coronavirus.ohio.gov/static/dashboards/COVIDDeathData_CountyOfResidence.csv\n& https://www2.census.gov/programs-surveys/popest/datasets/2010-2019/counties/asrh/cc-est2019-agesex-39.csv",
+       y="Total Daily Vaccinations")
 
+
+gg3
 
 
 
