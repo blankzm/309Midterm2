@@ -528,7 +528,7 @@ gg3 <- ggplot(covid_vax,
   theme_minimal() +
   theme(legend.position="none",
         axis.title.x=element_blank(),
-        plot.title=element_text(family="serif", size=16),
+        plot.title=element_text(family="serif"),
         plot.subtitle=element_text(family="serif"),
         axis.text = element_text(family="serif"),
         plot.caption=element_text(family="mono")) +
@@ -544,5 +544,61 @@ ggsave(filename = "vaxTimelineCount.png",
        height=6,
        dpi=600)
 
+############### assembling dashboard
+
+## to create dashboard:
+library(patchwork)
+# dash <- gg3 / (gg1 | gg2)
+##dash <- gg2 + gg1 + gg3 + plot_layout(ncol=2)
+
+# layout <- '
+# A#
+# BC
+# '
+# dash <- wrap_plots(A = gg2, B = gg1, C = gg2, design = layout)
+# 
+
+# custom_spacer <- ggplot() + theme_void()
+# 
+# design <- "
+# 1#
+# 23
+# "
+
+##gg1 <- gg1 + theme(aspect.ratio=3/4)
+##gg3 <- gg3 + theme(aspect.ratio=3/4)
+
+theme_border <- theme_gray() + 
+  theme(plot.background = element_rect(fill = NA, colour = 'black', size = 3))
+
+gg1 <-  gg1 + plot_annotation(theme = theme_border) + theme(plot.margin = margin(1, 1, 1, 1, "cm"))
+gg2 <-  gg2 + plot_annotation(theme = theme_border) + theme(plot.margin = margin(1, 1, 1, 1, "cm"))
+gg3 <-  gg3 + plot_annotation(theme = theme_border) + theme(plot.margin = margin(1, 1, 1, 1, "cm")) + labs(caption = "Source:  https://coronavirus.ohio.gov/static/dashboards/COVIDDeathData_CountyOfResidence.csv\n& https://www2.census.gov/programs-surveys/popest/datasets\n/2010-2019/counties/asrh/cc-est2019-agesex-39.csv")
+
+dash <- (gg2 / (gg1 | gg3)) +
+  theme(
+        plot.subtitle = element_text(size=4),
+        plot.caption = element_text(size=2)) +
+  plot_annotation(
+    title = 'COVID-19 Timeline and Age Group Effects in Ohio',
+    theme = theme(plot.title = element_text(size = 25, family="serif", hjust=0.5)))
+    ##theme = theme_border) ##+
+  ##plot_layout(widths = c(3, 1, 2)) ##, design=design)
+
+##dash <- gg1 / gg2 / gg3
+
+# ggsave(filename = "dashTest1.png",
+#        plot=dash,
+#        device="png",
+#        width=8,
+#        height=6,
+#        dpi=600)
+
+ggsave(filename = "dashtest2.png",
+       plot=dash,
+       device="png",
+       width=16,
+       height=12,
+       dpi=600)
 
 
