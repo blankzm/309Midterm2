@@ -1,0 +1,270 @@
+---
+title: "STA 309 Midterm 2"
+author: "Zoe Blank"
+date: "4/24/2022"
+output: html_document
+file name: "midterm2-fullcode.Rmd"
+directory: "/users/blankzm/Desktop/STA309/309Midterm2"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Initial Data Handling and Setup:
+
+```{r data setup, message = FALSE, warning = FALSE}
+##### NOTE:
+#### this chunk takes a bit of time to compile! ~1 minute
+
+library(tidyverse)
+## Turn off the summarize grouping messages...
+options(dplyr.summarise.inform = FALSE)
+
+##############
+## Data Input
+ohioCovid <- read_csv("https://coronavirus.ohio.gov/static/dashboards/COVIDDeathData_CountyOfResidence.csv")
+ohioVax <- read_csv("https://coronavirus.ohio.gov/static/dashboards/vaccine_data.csv")
+ohioPop <- read_csv("https://www2.census.gov/programs-surveys/popest/datasets/2010-2019/counties/asrh/cc-est2019-agesex-39.csv") 
+```
+
+
+## Plot 1: Percent of Cases by Age Group per Surge
+
+```{r, message = FALSE, warning = FALSE}
+## data for graph - select necessary variables
+covid_ages1 <- ohioCovid %>% 
+  mutate(Surge = case_when(`Onset Date` %in% seq.Date(as.Date("2020-01-01"), as.Date("2020-05-31"), by="day") ~ "Initial Cases", 
+                           `Onset Date` %in% seq.Date(as.Date("2020-10-01"), as.Date("2021-02-28"), by="day") ~ "Alpha Surge",
+                           `Onset Date` %in% seq.Date(as.Date("2021-07-01"), as.Date("2021-11-30"), by="day") ~ "Delta Surge",
+                           `Onset Date` %in% seq.Date(as.Date("2021-12-01"), as.Date("2022-02-28"), by="day") ~ "Omicron Surge",
+                           TRUE ~ "Other, Pre Vaccine") ) %>%
+  select(-c(Sex, `Admission Date`, `Date Of Death`, `Onset Date`, `County`)) %>% 
+  group_by(`Age Range`, Surge)
+
+## filter for surges of interest
+gg1 <- ggplot(covid_ages1 %>% filter(Surge%in%c("Alpha Surge", "Delta Surge", "Omicron Surge")), aes(x=Surge, fill=`Age Range`)) + 
+  ## look at proportions
+  geom_bar(position="fill") +
+  coord_cartesian(expand=FALSE) +
+  scale_fill_brewer(palette="YlOrBr") +
+  
+  ## flip so younger is on bottom - have to reorder labels
+  scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1.00), labels=c("100%", "75%", "50%", "25%", "0%"), trans="reverse") +
+  
+  ## annotating to replace legend
+  annotate("text", x="Alpha Surge", y=0.94, label="0-19", size=5, family="serif") +
+  annotate("text", x="Alpha Surge", y=0.83, label="20-29", size=5, family="serif") +
+  annotate("text", x="Alpha Surge", y=0.71, label="30-39", size=5, family="serif") +
+  annotate("text", x="Alpha Surge", y=0.58, label="40-49", size=5, family="serif") +
+  annotate("text", x="Alpha Surge", y=0.45, label="50-59", size=5, family="serif") +
+  annotate("text", x="Alpha Surge", y=0.31, label="60-69", size=5, family="serif") +
+  annotate("text", x="Alpha Surge", y=0.16, label="70-79", size=5, family="serif") +
+  annotate("text", x="Alpha Surge", y=0.05, label="Age Group: 80+", size=5, family="serif") +
+  
+  ## formatting
+  theme_minimal() +
+  theme(legend.position = "none",
+        plot.title=element_text(family="serif", size=16),
+        plot.subtitle=element_text(family="serif"),
+        axis.text = element_text(family="serif"),
+        plot.caption=element_text(family="mono"),
+        panel.grid.minor=element_blank()) +
+  labs(title="Percent of Total Cases Belonging to Each Age Group",
+       subtitle = "Grouped by surge.\nAge groups are labelled on the bar corresponding to the Alpha Surge; colors remain consistent across surges.\nWe note that the Delta and Omicron surges had higher impacts on the younger population compared to the Alpha surge.",
+       caption="Source: https://coronavirus.ohio.gov/static/dashboards/COVIDDeathData_CountyOfResidence.csv",
+       y=element_blank(),
+       x=element_blank())
+
+ggsave(filename = "covp1-percByAge.png",
+       plot=gg1,
+       device="png",
+       width=8,
+       height=6,
+       dpi=600)
+```
+
+## Plot 2: Daily Cases per Strain w/ Event Timeline
+
+```{r, message = FALSE, warning = FALSE}
+## data for graphing - different from last graph
+covid_ages2 <- ohioCovid %>% 
+  group_by(Date=`Onset Date`) %>%
+  summarize(Cases = sum(`Case Count`)) %>%
+  ## add in specific others to avoid random lines in graph
+  mutate(Surge = case_when(Date %in% seq.Date(as.Date("2020-01-01"), as.Date("2020-05-31"), by="day") ~ "Initial Cases", 
+                           Date %in% seq.Date(as.Date("2020-06-01"), as.Date("2020-09-30"), by="day") ~ "Other 1",
+                           Date %in% seq.Date(as.Date("2020-10-01"), as.Date("2021-02-28"), by="day") ~ "Alpha Surge",
+                           Date %in% seq.Date(as.Date("2020-03-01"), as.Date("2020-06-30"), by="day") ~ "Other 2",
+                           Date %in% seq.Date(as.Date("2021-07-01"), as.Date("2021-11-30"), by="day") ~ "Delta Surge",
+                           Date %in% seq.Date(as.Date("2021-12-01"), as.Date("2022-02-28"), by="day") ~ "Omicron Surge",
+                           Date >= as.Date("2022-03-01") ~ "Other, Post Vaccine",
+                           TRUE ~ "Pre Vaccine") )
+
+library(ggthemes)
+
+gg2 <- ggplot(covid_ages2,
+       aes(x=Date, y=Cases)) +
+  geom_line(aes(color=Surge)) + 
+  
+  ## point out surges
+  annotate("rect", xmin=as.Date("2020-10-01"), xmax=as.Date("2021-02-28"), ymin=0, ymax=33000, fill="firebrick", alpha=0.2) +
+  annotate("rect", xmin=as.Date("2021-07-01"), xmax=as.Date("2021-11-30"), ymin=0, ymax=33000, fill="dodgerblue", alpha=0.2) +
+  annotate("rect", xmin=as.Date("2021-12-01"), xmax=as.Date("2022-02-28"), ymin=0, ymax=33000, fill="forestgreen", alpha=0.2) +
+  
+  annotate("text", x = as.Date("2020-12-15"), y = 33500, color="firebrick", label="Alpha Surge") +
+  annotate("text", x = as.Date("2021-09-01"), y = 33500, color="dodgerblue", label="Delta Surge") +
+  annotate("text", x = as.Date("2022-01-10"), y = 33500, color="forestgreen", label="Omicron Surge") +
+  
+  ## make room for annotations
+  scale_y_continuous(limits=c(0,35000)) +
+  
+  coord_cartesian(expand=FALSE) +
+  
+  ## scale so surges stick out - between surges is gray
+  scale_color_manual(values=c("firebrick", "dodgerblue", "gray", "forestgreen", "gray", "gray", "gray"))  +
+  
+  ## ANNOTATING sig. dates:
+  ## easter 2020
+  annotate("text", y=29000, x=as.Date("2020-04-12"), label="Easter 2020", size=3) +
+  annotate("segment", x=as.Date("2020-04-12"), xend=as.Date("2020-04-12"), y=0, yend=28000, alpha=0.5) +
+  
+  ## many students go back to school 
+  annotate("text", y=25000, x=as.Date("2020-09-01"), label="Students go back to school\nafter earlier shutdowns", size=3) +
+  annotate("segment", x=as.Date("2020-09-01"), xend=as.Date("2020-09-01"), y=0, yend=24000, alpha=0.5) +
+  
+  ## second dose timeline: (2 weeks after first dose is available)
+  annotate("text", y=29000, x=as.Date("2021-01-01"), label="People begin receiving\nsecond dose of vaccine", size=3) +
+  annotate("segment", x=as.Date("2021-01-01"), xend=as.Date("2021-01-01"), y=0, yend=28000, alpha=0.5) +
+  
+  ## covid health orders lifted (including mask mandate)
+  annotate("text", y=25000, x=as.Date("2021-06-02"), label="COVID health orders\nlifted (including\nmask mandate)", size=3) +
+  annotate("segment", x=as.Date("2021-06-02"), xend=as.Date("2021-06-02"), y=0, yend=24000, alpha=0.5) +
+  
+  
+  ## school starts up after summer break 2021 ***
+  annotate("text", y=29000, x=as.Date("2021-08-01"), label="School resumes\nafter summer 2021", size=3) +
+  annotate("segment", x=as.Date("2021-08-01"), xend=as.Date("2021-08-01"), y=0, yend=28000, alpha=0.5) +
+  
+  ## thanksgiving 2021
+  annotate("text", y=25000, x=as.Date("2021-11-10"), label="Thanksgiving\n2021", size=3) +
+  annotate("segment", x=as.Date("2021-11-25"), xend=as.Date("2021-11-25"), y=0, yend=24000, alpha=0.5) +
+  
+  ## date formatting info:
+  ## https://www.datanovia.com/en/blog/ggplot-date-axis-customization/
+  scale_x_date(date_labels = "%b '%y") +
+  
+  ## formatting:
+  theme_minimal() +
+  theme(legend.position="none",
+        axis.title.x=element_blank(),
+        plot.title=element_text(family="serif", size=16),
+        plot.subtitle=element_text(family="serif"),
+        axis.text = element_text(family="serif"),
+        plot.caption=element_text(family="mono")) +
+  labs(title="Timeline of Daily Covid Cases in Ohio by Surge",
+       subtitle="Notable events are annotated. Data ranges from Jan. 2020 - present.\nWe observe that cases spike after events such as holidays or return to school, and drop when\nthe vaccine becomes available.",
+       caption="Source:  https://coronavirus.ohio.gov/static/dashboards/COVIDDeathData_CountyOfResidence.csv",
+       y="Daily Cases")
+
+ggsave(filename = "covCaseCount.png",
+       plot=gg2,
+       device="png",
+       width=8,
+       height=6,
+       dpi=600)
+```
+
+## Plot 3: Vax Timeline w/ Annotations
+
+```{r, message = FALSE, warning = FALSE}
+## data for plot
+## data will look at "vaccination" as administer of FIRST DOSE
+covid_vax <- ohioVax %>% 
+  group_by(date) %>%
+  summarize(totVax = sum(vaccines_started)) %>%
+  ## add in specific others to avoid random lines in graph
+  mutate(Surge = case_when(date %in% seq.Date(as.Date("2020-01-01"), as.Date("2020-05-31"), by="day") ~ "Initial Cases", 
+                           date %in% seq.Date(as.Date("2020-06-01"), as.Date("2020-09-30"), by="day") ~ "Other 1",
+                           date %in% seq.Date(as.Date("2020-10-01"), as.Date("2021-02-28"), by="day") ~ "Alpha Surge",
+                           date %in% seq.Date(as.Date("2020-03-01"), as.Date("2020-06-30"), by="day") ~ "Other 2",
+                           date %in% seq.Date(as.Date("2021-07-01"), as.Date("2021-11-30"), by="day") ~ "Delta Surge",
+                           date %in% seq.Date(as.Date("2021-12-01"), as.Date("2022-02-28"), by="day") ~ "Omicron Surge",
+                           date >= as.Date("2022-03-01") ~ "Other, Post Vaccine",
+                           TRUE ~ "Pre Vaccine") )
+
+gg3 <- ggplot(covid_vax,
+       aes(x=date, y=totVax)) +
+  geom_col(width=1, alpha=0.5) +
+  
+  ## annotate surges
+  annotate("rect", xmin=as.Date("2020-12-12"), xmax=as.Date("2021-02-28"), ymin=0, ymax=108000, fill="firebrick", alpha=0.2) +
+  annotate("rect", xmin=as.Date("2021-07-01"), xmax=as.Date("2021-11-30"), ymin=0, ymax=108000, fill="dodgerblue", alpha=0.2) +
+  annotate("rect", xmin=as.Date("2021-12-01"), xmax=as.Date("2022-02-28"), ymin=0, ymax=108000, fill="forestgreen", alpha=0.2) +
+  
+  annotate("text", x = as.Date("2021-01-20"), y = 110000, color="firebrick", label="Alpha Surge") +
+  annotate("text", x = as.Date("2021-09-01"), y = 110000, color="dodgerblue", label="Delta Surge") +
+  annotate("text", x = as.Date("2022-01-10"), y = 110000, color="forestgreen", label="Omicron Surge") +
+  
+  ## add smooth line to show general trend
+  geom_smooth(span=0.1, se=FALSE, color="black") +
+  
+  ## some formatting:
+  coord_cartesian(expand=FALSE) +
+  scale_fill_manual(values=c("red", "blue", "gray", "green", "gray"))  +
+  theme_minimal() +
+  theme(legend.position="none") +
+  
+  ## testing out vax dates
+  ## vax available:
+  ## (note: fully transparent rectangle is to nudge axis so annotations will show)
+  annotate("rect", xmin=as.Date("2020-11-01"), xmax=as.Date("2020-12-14"), ymin=75000, ymax=85000, alpha=0) +
+  annotate("text", x=as.Date("2020-12-12"), y=82000, label="First Available\nDec. '20", size=2) +
+  annotate("segment", x=as.Date("2020-12-14"), xend=as.Date("2020-12-12"), y=80000, yend=0) +
+
+ 
+  
+  ## available for 65 +
+  annotate("text", x=as.Date("2021-01-18"), y=102000, label="65+ Age Group\nJan. '21", size=2) +
+  annotate("segment", x=as.Date("2021-01-18"), xend=as.Date("2021-01-18"), y=100000, yend=0) +
+  
+  ## educators/childcare staff
+  annotate("text", x=as.Date("2021-02-28"), y=82000, label="Educators and Childcare staff\nMar. '21", size=2) +
+  annotate("segment", x=as.Date("2021-03-02"), xend=as.Date("2021-03-02"), y=80000, yend=0) +
+  
+  ## 16+ (pfizer)/ 18+(jj / moderna)
+  annotate("text", x=as.Date("2021-04-13"), y=102000, label="16+ (Pfizer) or\n18+(J&J + Moderna) Age Groups\nApr. '21", size=2) +
+  annotate("segment", x=as.Date("2021-04-15"), xend=as.Date("2021-04-15"), y=100000, yend=0) +
+  
+  ## fda approval(pfizer)
+  annotate("text", x=as.Date("2021-09-22"), y=82000, label="FDA approval for Pfizer\nSep. '21", size=2) +
+  annotate("segment", x=as.Date("2021-09-24"), xend=as.Date("2021-09-24"), y=80000, yend=0) +
+  
+  ## pfizer for 5+
+  annotate("text", x=as.Date("2021-11-01"), y=102000, label="5+ Age Group (Pfizer)\nNov. '21", size=2)  +
+  annotate("segment", x=as.Date("2021-11-03"), xend=as.Date("2021-11-03"), y=100000, yend=0) +
+  
+  ## more formatting:
+  scale_x_date(date_labels = "%b '%y") + 
+  scale_y_continuous(limits=c(0,115000)) +
+  theme_minimal() +
+  theme(legend.position="none",
+        axis.title.x=element_blank(),
+        plot.title=element_text(family="serif", size=16),
+        plot.subtitle=element_text(family="serif"),
+        axis.text = element_text(family="serif"),
+        plot.caption=element_text(family="mono")) +
+  labs(title="Timeline of Daily Vaccinations in Ohio by Surge",
+       subtitle="Progression of vaccination guidelines is annotated. Vaccines observed are first doses.\nData ranges from Dec. 2020 - present. Columns represent daily vaccinations administered.\nSmooth line represents local averaging performed by the loess method.\nWe note that vaccine counts peak after certain group are approved for the vaccine,\nsuch as adults 65 and older, or educators.",
+       caption="Source:  https://coronavirus.ohio.gov/static/dashboards/COVIDDeathData_CountyOfResidence.csv\n& https://www2.census.gov/programs-surveys/popest/datasets/2010-2019/counties/asrh/cc-est2019-agesex-39.csv",
+       y="Total Daily Vaccinations")
+
+ggsave(filename = "vaxTimelineCount.png",
+       plot=gg3,
+       device="png",
+       width=8,
+       height=6,
+       dpi=600)
+```
+
+
