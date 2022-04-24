@@ -76,6 +76,10 @@ gg1 <- ggplot(covid_ages1 %>% filter(Surge%in%c("Alpha Surge", "Delta Surge", "O
        y=element_blank(),
        x=element_blank())
 
+## view 
+gg1
+
+## save
 ggsave(filename = "covp1-percByAge.png",
        plot=gg1,
        device="png",
@@ -167,6 +171,10 @@ gg2 <- ggplot(covid_ages2,
        caption="Source:  https://coronavirus.ohio.gov/static/dashboards/COVIDDeathData_CountyOfResidence.csv",
        y="Daily Cases")
 
+## view
+gg2
+
+## save
 ggsave(filename = "covCaseCount.png",
        plot=gg2,
        device="png",
@@ -258,6 +266,10 @@ gg3 <- ggplot(covid_vax,
        caption="Source:  https://coronavirus.ohio.gov/static/dashboards/COVIDDeathData_CountyOfResidence.csv\n& https://www2.census.gov/programs-surveys/popest/datasets/2010-2019/counties/asrh/cc-est2019-agesex-39.csv",
        y="Total Daily Vaccinations")
 
+## view
+gg3
+
+## save
 ggsave(filename = "vaxTimelineCount.png",
        plot=gg3,
        device="png",
@@ -267,7 +279,7 @@ ggsave(filename = "vaxTimelineCount.png",
 ```
 
 ## Assembling Dashboard
-```{r, message = FALSE, warning = FALSE}
+```{r, message = FALSE, warning = FALSE, fig.width=16, fig.height=12}
 library(patchwork)
 
 ## some theme things - add a black box around plots
@@ -286,7 +298,12 @@ dash <- (gg2 / (gg1 | gg3)) +
         plot.caption = element_text(size=2)) +
   plot_annotation(
     title = 'COVID-19 Timeline and Age Group Effects in Ohio',
-    theme = theme(plot.title = element_text(size = 25, family="serif", hjust=0.5)))
+    subtitle = 'A dashboard that evaluates the prevalence of COVID in different age groups in Ohio and analyzes COVID rates and vaccination counts\nafter important events such as holidays, new mandates, and vaccination guidelines.',
+    theme = theme(plot.title = element_text(size = 25, family="serif", hjust=0.5),
+                  plot.subtitle = element_text(size = 19, family="serif", hjust=0.5)))
+
+## view in html
+dash
 
 ## save!
 ggsave(filename = "dashFinal.png",
