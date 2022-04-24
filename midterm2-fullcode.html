@@ -368,14 +368,13 @@ gg3 &lt;- ggplot(covid_vax,
   theme(legend.position=&quot;none&quot;) +
   
   ## testing out vax dates
+  ## datese from https://doh.wa.gov/sites/default/files/2022-02/348-862-VaccineTimeline.pdf
   ## vax available:
   ## (note: fully transparent rectangle is to nudge axis so annotations will show)
   annotate(&quot;rect&quot;, xmin=as.Date(&quot;2020-11-01&quot;), xmax=as.Date(&quot;2020-12-14&quot;), ymin=75000, ymax=85000, alpha=0) +
   annotate(&quot;text&quot;, x=as.Date(&quot;2020-12-12&quot;), y=82000, label=&quot;First Available\nDec. &#39;20&quot;, size=2) +
   annotate(&quot;segment&quot;, x=as.Date(&quot;2020-12-14&quot;), xend=as.Date(&quot;2020-12-12&quot;), y=80000, yend=0) +
 
- 
-  
   ## available for 65 +
   annotate(&quot;text&quot;, x=as.Date(&quot;2021-01-18&quot;), y=102000, label=&quot;65+ Age Group\nJan. &#39;21&quot;, size=2) +
   annotate(&quot;segment&quot;, x=as.Date(&quot;2021-01-18&quot;), xend=as.Date(&quot;2021-01-18&quot;), y=100000, yend=0) +
@@ -416,6 +415,36 @@ ggsave(filename = &quot;vaxTimelineCount.png&quot;,
        device=&quot;png&quot;,
        width=8,
        height=6,
+       dpi=600)</code></pre>
+</div>
+<div id="assembling-dashboard" class="section level2">
+<h2>Assembling Dashboard</h2>
+<pre class="r"><code>library(patchwork)
+
+## some theme things - add a black box around plots
+## info from https://github.com/thomasp85/patchwork/issues/201
+## and https://ggplot2.tidyverse.org/reference/element.html
+theme_border &lt;- theme_gray() + 
+  theme(plot.background = element_rect(fill = NA, colour = &#39;black&#39;, size = 3))
+
+gg1 &lt;-  gg1 + plot_annotation(theme = theme_border) + theme(plot.margin = margin(1, 1, 1, 1, &quot;cm&quot;))
+gg2 &lt;-  gg2 + plot_annotation(theme = theme_border) + theme(plot.margin = margin(1, 1, 1, 1, &quot;cm&quot;))
+gg3 &lt;-  gg3 + plot_annotation(theme = theme_border) + theme(plot.margin = margin(1, 1, 1, 1, &quot;cm&quot;)) + labs(caption = &quot;Source:  https://coronavirus.ohio.gov/static/dashboards/COVIDDeathData_CountyOfResidence.csv\n&amp; https://www2.census.gov/programs-surveys/popest/datasets\n/2010-2019/counties/asrh/cc-est2019-agesex-39.csv&quot;)
+
+## info from https://patchwork.data-imaginist.com/articles/guides/layout.html
+dash &lt;- (gg2 / (gg1 | gg3)) +
+  theme(plot.subtitle = element_text(size=4),
+        plot.caption = element_text(size=2)) +
+  plot_annotation(
+    title = &#39;COVID-19 Timeline and Age Group Effects in Ohio&#39;,
+    theme = theme(plot.title = element_text(size = 25, family=&quot;serif&quot;, hjust=0.5)))
+
+## save!
+ggsave(filename = &quot;dashFinal.png&quot;,
+       plot=dash,
+       device=&quot;png&quot;,
+       width=16,
+       height=12,
        dpi=600)</code></pre>
 </div>
 
