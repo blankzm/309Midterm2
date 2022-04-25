@@ -2,11 +2,12 @@
 Repo for the STA 309 Midterm 2 - Spring 2022
 
 ### Note:
-As I was adding the final touches on this project and had updated my .Rmd file, I noticed that the project in R of this repo had disappeared and was no longer on my laptop. Luckily, all the files were saved. I tried pulling from GitHub and tried generating a new PAT, but neither of these worked - therefore, I manually updated the files that had been changed. All code and generated images should still be present in this repo.
+As I was adding the final touches on this project and had updated my .Rmd file, I noticed that the project in R of this repo had disappeared and was no longer on my laptop. Luckily, all the files were saved. I tried pulling from GitHub and tried generating a new PAT, but neither of these worked - therefore, I manually updated the files that had been changed. All code and generated images should still be present in this repo. This is why we back up our code - thanks GitHub!!
 
 ## Assignment Guidelines:
 Use the material you have learned this class to build a dashboard comparing the impact of the three COVID-19 surges (the so called 'alpha', 'delta' and 'omicron' surges) in the state of Ohio.  Impact can be measured in many ways, you have flexibility to specify the impact in your dashboard. 
 
+## Repo Contents:
 This repo includes code generating plots that look at Ohio Covid data broken down by the Alpha, Delta, and Omicron surges. The following files are included:
 
 * **midterm2-fullcode.Rmd** - A markdown document containing well-cleaned, commented, and reproducible code. Knitting this markdown will display the three different graphs alongside the final dashboard, and will also save these images as .png files to your computer. **This is the best way to view the code for this project.**
