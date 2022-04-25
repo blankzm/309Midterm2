@@ -3,9 +3,12 @@ title: "STA 309 Midterm 2"
 author: "Zoe Blank"
 date: "4/24/2022"
 output: html_document
-file name: "midterm2-fullcode.Rmd"
-directory: "/users/blankzm/Desktop/STA309/309Midterm2"
 ---
+
+**file name:** "midterm2-fullcode.Rmd"
+
+**directory:** "/users/blankzm/Desktop/STA309/309Midterm2"
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -29,7 +32,7 @@ ohioPop <- read_csv("https://www2.census.gov/programs-surveys/popest/datasets/20
 ```
 
 
-## Plot 1: Percent of Cases by Age Group per Surge
+### Plot 1: Percent of Cases by Age Group per Surge
 
 ```{r, message = FALSE, warning = FALSE}
 ## data for graph - select necessary variables
@@ -65,13 +68,13 @@ gg1 <- ggplot(covid_ages1 %>% filter(Surge%in%c("Alpha Surge", "Delta Surge", "O
   ## formatting
   theme_minimal() +
   theme(legend.position = "none",
-        plot.title=element_text(family="serif", size=16),
+        plot.title=element_text(family="serif"),
         plot.subtitle=element_text(family="serif"),
         axis.text = element_text(family="serif"),
         plot.caption=element_text(family="mono"),
         panel.grid.minor=element_blank()) +
   labs(title="Percent of Total Cases Belonging to Each Age Group",
-       subtitle = "Grouped by surge.\nAge groups are labelled on the bar corresponding to the Alpha Surge; colors remain consistent across surges.\nWe note that the Delta and Omicron surges had higher impacts on the younger population compared to the Alpha surge.",
+       subtitle = "Grouped by surge.\nAge groups are labelled on the bar corresponding to the Alpha Surge; colors remain consistent\nacross surges. We note that the Delta and Omicron surges had higher impacts on the younger population\ncompared to the Alpha surge.",
        caption="Source: https://coronavirus.ohio.gov/static/dashboards/COVIDDeathData_CountyOfResidence.csv",
        y=element_blank(),
        x=element_blank())
@@ -88,7 +91,7 @@ ggsave(filename = "covp1-percByAge.png",
        dpi=600)
 ```
 
-## Plot 2: Daily Cases per Strain w/ Event Timeline
+### Plot 2: Daily Cases per Strain with Event Timeline
 
 ```{r, message = FALSE, warning = FALSE}
 ## data for graphing - different from last graph
@@ -162,12 +165,12 @@ gg2 <- ggplot(covid_ages2,
   theme_minimal() +
   theme(legend.position="none",
         axis.title.x=element_blank(),
-        plot.title=element_text(family="serif", size=16),
+        plot.title=element_text(family="serif"),
         plot.subtitle=element_text(family="serif"),
         axis.text = element_text(family="serif"),
         plot.caption=element_text(family="mono")) +
   labs(title="Timeline of Daily Covid Cases in Ohio by Surge",
-       subtitle="Notable events are annotated. Data ranges from Jan. 2020 - present.\nWe observe that cases spike after events such as holidays or return to school, and drop when\nthe vaccine becomes available.",
+       subtitle="Data ranges from Jan. 2020 - present. We observe that cases spike after events such as holidays,\nas well as age-related events like the return to school, and drop when the vaccine becomes available.",
        caption="Source:  https://coronavirus.ohio.gov/static/dashboards/COVIDDeathData_CountyOfResidence.csv",
        y="Daily Cases")
 
@@ -183,7 +186,7 @@ ggsave(filename = "covCaseCount.png",
        dpi=600)
 ```
 
-## Plot 3: Vax Timeline w/ Annotations
+### Plot 3: Vaccine Timeline with Annotations
 
 ```{r, message = FALSE, warning = FALSE}
 ## data for plot
@@ -224,7 +227,7 @@ gg3 <- ggplot(covid_vax,
   theme(legend.position="none") +
   
   ## testing out vax dates
-  ## datese from https://doh.wa.gov/sites/default/files/2022-02/348-862-VaccineTimeline.pdf
+  ## general timeline from https://doh.wa.gov/sites/default/files/2022-02/348-862-VaccineTimeline.pdf
   ## vax available:
   ## (note: fully transparent rectangle is to nudge axis so annotations will show)
   annotate("rect", xmin=as.Date("2020-11-01"), xmax=as.Date("2020-12-14"), ymin=75000, ymax=85000, alpha=0) +
@@ -257,13 +260,13 @@ gg3 <- ggplot(covid_vax,
   theme_minimal() +
   theme(legend.position="none",
         axis.title.x=element_blank(),
-        plot.title=element_text(family="serif", size=16),
+        plot.title=element_text(family="serif"),
         plot.subtitle=element_text(family="serif"),
         axis.text = element_text(family="serif"),
         plot.caption=element_text(family="mono")) +
   labs(title="Timeline of Daily Vaccinations in Ohio by Surge",
-       subtitle="Progression of vaccination guidelines is annotated. Vaccines observed are first doses.\nData ranges from Dec. 2020 - present. Columns represent daily vaccinations administered.\nSmooth line represents local averaging performed by the loess method.\nWe note that vaccine counts peak after certain group are approved for the vaccine,\nsuch as adults 65 and older, or educators.",
-       caption="Source:  https://coronavirus.ohio.gov/static/dashboards/COVIDDeathData_CountyOfResidence.csv\n& https://www2.census.gov/programs-surveys/popest/datasets/2010-2019/counties/asrh/cc-est2019-agesex-39.csv",
+       subtitle="Columns represent daily vaccinations administered.\nSmooth line represents local averaging performed by the loess method.\nWe note that vaccine counts peak after certain groups are approved for the vaccine,\nsuch as adults 65 and older, or educators.",
+       caption="Source:  https://coronavirus.ohio.gov/static/dashboards/COVIDDeathData_CountyOfResidence.csv\n& https://www2.census.gov/programs-surveys/popest/datasets\n/2010-2019/counties/asrh/cc-est2019-agesex-39.csv",
        y="Total Daily Vaccinations")
 
 ## view
@@ -282,15 +285,15 @@ ggsave(filename = "vaxTimelineCount.png",
 ```{r, message = FALSE, warning = FALSE, fig.width=16, fig.height=12}
 library(patchwork)
 
-## some theme things - add a black box around plots
+## some theme things - add a black border around graphs and margins around whole plots
 ## info from https://github.com/thomasp85/patchwork/issues/201
 ## and https://ggplot2.tidyverse.org/reference/element.html
 theme_border <- theme_gray() + 
   theme(plot.background = element_rect(fill = NA, colour = 'black', size = 3))
 
-gg1 <-  gg1 + plot_annotation(theme = theme_border) + theme(plot.margin = margin(1, 1, 1, 1, "cm"))
+gg1 <-  gg1 + plot_annotation(theme = theme_border) + theme(plot.margin = margin(0.5, 0.5, 0.5, 0.5, "cm"))
 gg2 <-  gg2 + plot_annotation(theme = theme_border) + theme(plot.margin = margin(1, 1, 1, 1, "cm"))
-gg3 <-  gg3 + plot_annotation(theme = theme_border) + theme(plot.margin = margin(1, 1, 1, 1, "cm")) + labs(caption = "Source:  https://coronavirus.ohio.gov/static/dashboards/COVIDDeathData_CountyOfResidence.csv\n& https://www2.census.gov/programs-surveys/popest/datasets\n/2010-2019/counties/asrh/cc-est2019-agesex-39.csv")
+gg3 <-  gg3 + plot_annotation(theme = theme_border) + theme(plot.margin = margin(0.5, 0.5, 0.5, 0.5, "cm"))
 
 ## info from https://patchwork.data-imaginist.com/articles/guides/layout.html
 dash <- (gg2 / (gg1 | gg3)) +
@@ -298,7 +301,7 @@ dash <- (gg2 / (gg1 | gg3)) +
         plot.caption = element_text(size=2)) +
   plot_annotation(
     title = 'COVID-19 Timeline and Age Group Effects in Ohio',
-    subtitle = 'A dashboard that evaluates the prevalence of COVID in different age groups in Ohio and analyzes COVID rates and vaccination counts\nafter important events such as holidays, new mandates, and vaccination guidelines.',
+    subtitle = 'A dashboard looks at the timeline of COVID-19 and its impact on various age groups, including the impact of age-related events\nsuch as vaccine timelines and the return to school, all through the lens of\ncomparing the impacts of the three main surges of Covid.',
     theme = theme(plot.title = element_text(size = 25, family="serif", hjust=0.5),
                   plot.subtitle = element_text(size = 19, family="serif", hjust=0.5)))
 
